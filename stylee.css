@@ -1,0 +1,33 @@
+h1 span {
+    color: rgb(163, 39, 39);
+  }
+  
+  h1 {
+    text-align: center;
+    font-size: 4.5em;
+    color: #fdfdfd;
+    margin-bottom: 5px;
+    -webkit-text-stroke: 0.3vw blue;
+    text-transform: uppercase;
+    position: relative;
+    transition: all 0.5s ease-in-out;
+  }
+  
+  h1::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    color: lightblue;
+    -webkit-text-stroke: 0vw lightblue;
+    border-right: 2px solid blue;
+    overflow: hidden;
+    transition: width 1.5s ease-in-out;
+  }
+  
+  h1:hover::before {
+    width: 100%;
+  }
+  

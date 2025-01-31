@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Puzzle</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+     
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(4, 100px);
+            gap: 2px;
+            border: 2px solid #333;
+            margin-bottom: 10px;
+        }
+        .piece {
+            width: 100px;
+            height: 100px;
+            background-size: 400px 400px;
+            cursor: grab;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:disabled {
+            background-color: #888;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <body style="background-image: url('petals.jpg'); background-size: cover; background-position: center;"></body>
+
+ 
+
+
+    <!-- Puzzle Game -->
+    <div class="puzzle-container" id="puzzle"></div>
+    <div class="button-container">
+        <button onclick="shufflePuzzle()">Shuffle Puzzle</button>
+        <button id="nextPuzzleBtn" onclick="nextPuzzle()" disabled>Next Puzzle</button>
+        <button id="goToNextPageBtn" onclick="goToNextPage()" style="display: none;">Go to Next Page</button>
+    </div>
+    
+    <script>
+        const music = document.getElementById('backgroundMusic');
+        const musicSource = document.getElementById('musicSource');
+        const musicTitle = document.getElementById('musicTitle');
+        const musicToggleBtn = document.getElementById('musicToggleBtn');
+        const goToNextPageBtn = document.getElementById('goToNextPageBtn');
+        const nextPuzzleBtn = document.getElementById('nextPuzzleBtn');
+        
+        const musicTracks = [
+            { title: "Track 1", src: "women.mp3" },
+        ];
+
+        let currentTrackIndex = 0;
+
+        function toggleMusic() {
+            if (music.paused) {
+                music.play();
+                musicToggleBtn.textContent = "Pause Music";
+            } else {
+                music.pause();
+                musicToggleBtn.textContent = "Play Music";
+            }
+        }
+
+        function nextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % musicTracks.length;
+            musicSource.src = musicTracks[currentTrackIndex].src;
+            musicTitle.textContent = "Now Playing: " + musicTracks[currentTrackIndex].title;
+            music.load();
+            music.play();
+            musicToggleBtn.textContent = "Pause Music";
+        }
+
+        const container = document.getElementById('puzzle');
+        const imageSet = ['1.jpg', '2.jpg', '3.jpg'];
+        let currentImageIndex = 0;
+
+        let pieces = [];
+        let completedPuzzles = 0; 
+
+        function loadPuzzle(imageURL) {
+            pieces = [];
+            container.innerHTML = ''; 
+            for (let i = 0; i < 16; i++) {
+                let piece = document.createElement('div');
+                piece.classList.add('piece');
+                piece.style.backgroundImage = `url(${imageURL})`;
+                piece.style.backgroundPosition = `-${(i % 4) * 100}px -${Math.floor(i / 4) * 100}px`;
+                piece.dataset.index = i;
+                piece.setAttribute('draggable', true);
+                pieces.push(piece);
+            }
+            shufflePuzzle();
+            addDragAndDrop();
+        }
+
+        function shufflePuzzle() {
+            pieces.sort(() => Math.random() - 0.5);
+            container.innerHTML = '';
+            pieces.forEach(piece => container.appendChild(piece));
+            nextPuzzleBtn.disabled = true;
+            goToNextPageBtn.style.display = "none";
+        }
+
+        function checkPuzzleCompletion() {
+            const isCorrect = pieces.every((piece, index) => piece.dataset.index == index);
+            if (isCorrect) {
+                completedPuzzles++;
+                if (completedPuzzles === 3) {
+                    nextPuzzleBtn.style.display = "none";
+                    goToNextPageBtn.style.display = "block";
+                    alert("Congratulations! You completed all puzzles. Click 'Go to Next Page'.");
+                } else {
+                    nextPuzzleBtn.disabled = false;
+                    alert("Puzzle Completed! Click 'Next Puzzle' to continue.");
+                }
+            }
+        }
+
+        function nextPuzzle() {
+            currentImageIndex = (currentImageIndex + 1) % imageSet.length;
+            loadPuzzle(imageSet[currentImageIndex]);
+        }
+
+        function addDragAndDrop() {
+            let dragged = null;
+            pieces.forEach(piece => {
+                piece.addEventListener('dragstart', function() {
+                    dragged = this;
+                });
+                piece.addEventListener('dragover', function(event) {
+                    event.preventDefault();
+                });
+                piece.addEventListener('drop', function() {
+                    if (dragged && dragged !== this) {
+                        let draggedIndex = pieces.indexOf(dragged);
+                        let droppedIndex = pieces.indexOf(this);
+                        [pieces[draggedIndex], pieces[droppedIndex]] = [pieces[droppedIndex], pieces[draggedIndex]];
+                        container.innerHTML = '';
+                        pieces.forEach(piece => container.appendChild(piece));
+                        checkPuzzleCompletion();
+                    }
+                });
+            });
+        }
+
+        function goToNextPage() {
+            window.location.href = "index.html"; 
+        }
+
+        loadPuzzle(imageSet[currentImageIndex]);
+        music.play(); 
+    </script>
+</body>
+</html>
